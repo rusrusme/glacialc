@@ -25,7 +25,6 @@ target_include_directories(bshc_core
                            PRIVATE ${CMAKE_SOURCE_DIR}/bshc/src
 )
 
-target_precompile_headers(bshc_core PRIVATE bshc/src/bshc_pch.hpp)
 target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
 
 add_executable(BSHC bshc/src/BSH.cpp)
