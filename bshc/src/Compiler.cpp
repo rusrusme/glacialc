@@ -31,8 +31,14 @@ namespace bshc {
         const shaderc::Compiler compiler;
         shaderc::CompileOptions options;
 
-        // Vulkan 1.3 Target
+        #if defined(BSH_TARGET_OPENGL)
+        options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
+        #elif defined(BSH_TARGET_VULKAN)
         options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_3);
+        #else
+        options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
+        #endif
+
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
         std::vector<uint8_t>& buffer = result.binary_data;
