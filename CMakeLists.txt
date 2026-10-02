@@ -21,8 +21,8 @@ add_library(bshc_core STATIC
 )
 
 target_include_directories(bshc_core
-                           PUBLIC  ${CMAKE_SOURCE_DIR}/bshc/include
-                           PRIVATE ${CMAKE_SOURCE_DIR}/bshc/src
+                           PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/bshc/include
+                           PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/bshc/src
 )
 
 target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
