@@ -44,6 +44,7 @@ namespace bshc {
         void parse_metadata_directive(std::string_view line, BSHHeader& header);
 
         std::filesystem::path include_dir_;
-        std::unordered_set<std::string> included_files_;
+        std::unordered_set<std::string> included_files_;   // Files guarded by #pragma once
+        std::unordered_set<std::string> active_includes_;  // Current recursion stack for cycle detection
     };
 } // bshc

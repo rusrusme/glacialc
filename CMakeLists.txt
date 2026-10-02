@@ -28,7 +28,7 @@ target_include_directories(bshc_core
 target_precompile_headers(bshc_core PRIVATE bshc/src/bshc_pch.hpp)
 target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
 
-add_executable(BasisShaderCompiler bshc/src/BSH.cpp)
-target_link_libraries(BasisShaderCompiler PRIVATE bshc_core)
+add_executable(BSHC bshc/src/BSH.cpp)
+target_link_libraries(BSHC PRIVATE bshc_core)
 
 add_subdirectory(test)

@@ -26,9 +26,11 @@ namespace bshc {
     ParseResult Preprocessor::process(std::string_view source, const std::filesystem::path& current_file_path) {
         ParseResult result;
         included_files_.clear();
+        active_includes_.clear();
 
         if (!current_file_path.empty()) {
-            included_files_.insert(std::filesystem::canonical(current_file_path).string());
+            const std::string root_canonical = std::filesystem::canonical(current_file_path).string();
+            active_includes_.insert(root_canonical);
         }
 
         std::string global_buffer;
@@ -73,13 +75,13 @@ namespace bshc {
                 continue;
             }
 
-            // 1. Metadata Annotations (@depth_test, @cull_mode, etc.)
+            // Metadata Annotations (@depth_test, @cull_mode, etc.)
             if (trimmed.starts_with('@')) {
                 parse_metadata_directive(trimmed, header);
                 continue;
             }
 
-            // 2. Pragmas (#pragma once)
+            // Pragmas (#pragma once)
             if (trimmed == "#pragma once") {
                 if (!current_file_path.empty()) {
                     included_files_.insert(std::filesystem::canonical(current_file_path).string());
@@ -87,9 +89,9 @@ namespace bshc {
                 continue;
             }
 
-            // 3. Stage Directives (#vert, #frag, #geom, #comp)
+            // Stage Directives (#vert, #frag, #geom, #comp)
             if (trimmed == "#vert" || trimmed == "#frag" || trimmed == "#geom" || trimmed == "#comp") {
-                ShaderStage stage = ShaderStage::VERTEX;
+                auto stage = ShaderStage::VERTEX;
                 if (trimmed == "#frag") stage = ShaderStage::FRAGMENT;
                 else if (trimmed == "#geom") stage = ShaderStage::GEOMETRY;
                 else if (trimmed == "#comp") stage = ShaderStage::COMPUTE;
@@ -99,7 +101,7 @@ namespace bshc {
                 continue;
             }
 
-            // 4. Include Directives (#include "...")
+            // Include Directives (#include "...")
             if (trimmed.starts_with("#include")) {
                 size_t first_quote = trimmed.find('"');
                 size_t last_quote = trimmed.rfind('"');
@@ -127,8 +129,16 @@ namespace bshc {
                 }
 
                 std::string canonical_path = std::filesystem::canonical(target_path).string();
+
+                // Circular Dependency Guard
+                if (active_includes_.contains(canonical_path)) {
+                    result.success = false;
+                    result.error_message = "Circular #include dependency detected: " + canonical_path;
+                    return;
+                }
+
+                // Skip if guarded by #pragma once
                 if (included_files_.contains(canonical_path)) {
-                    // Skip included file due to #pragma once / circular include prevention
                     continue;
                 }
 
@@ -139,8 +149,16 @@ namespace bshc {
                     return;
                 }
 
-                std::string included_content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+                std::string included_content((std::istreambuf_iterator(file)), std::istreambuf_iterator<char>());
+
+                // Push onto active include stack for recursion, then pop
+                active_includes_.insert(canonical_path);
                 process_source(included_content, target_path, header, global_buffer, stage_buffers, active_stage_idx, result);
+                active_includes_.erase(canonical_path);
+
+                if (!result.success) {
+                    return;
+                }
                 continue;
             }
 

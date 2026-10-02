@@ -8,3 +8,6 @@ target_link_libraries(PreprocessorTest PRIVATE bshc_core)
 add_executable(CompilerTest CompilerTest.cpp)
 target_link_libraries(CompilerTest PRIVATE bshc_core)
 
+add_executable(CircularIncludeTest CircularIncludeTest.cpp)
+target_link_libraries(CircularIncludeTest PRIVATE bshc_core)
+
