@@ -14,6 +14,10 @@ add_library(bshc_core STATIC
             bshc/src/Lexer.cpp
             bshc/include/Lexer.hpp
             bshc/include/BSH.hpp
+            bshc/src/Preprocessor.cpp
+            bshc/include/Preprocessor.hpp
+            bshc/src/Compiler.cpp
+            bshc/include/Compiler.hpp
 )
 
 target_include_directories(bshc_core

@@ -11,7 +11,7 @@
 
 using namespace bshc;
 
-constexpr std::string_view token_type_to_string(const TokenType type) {
+static constexpr std::string_view token_type_to_string(const TokenType type) {
     switch (type) {
         case TokenType::VERT : return "VERT";
         case TokenType::FRAG : return "FRAG";
@@ -46,26 +46,26 @@ constexpr std::string_view token_type_to_string(const TokenType type) {
 
 int main() {
     constexpr std::string_view test_shader = R"(
-// Sample Basis Shader File
-@depth_test
-@cull_mode = 2
+        // Sample Basis Shader File
+        @depth_test
+        @cull_mode = 2
 
-#include "common/camera.glsl"
+        #include "common/camera.glsl"
 
-#vert
-layout(location = 0) in vec3 a_Pos;
+        #vert
+        layout(location = 0) in vec3 a_Pos;
 
-void main() {
-    gl_Position = vec4(a_Pos, 1.0);
-}
+        void main() {
+            gl_Position = vec4(a_Pos, 1.0);
+        }
 
-#frag
-layout(location = 0) out vec4 FragColor;
+        #frag
+        layout(location = 0) out vec4 FragColor;
 
-void main() {
-    FragColor = vec4(1.0, 0.0, 0.0, 1.0);
-}
-)";
+        void main() {
+            FragColor = vec4(1.0, 0.0, 0.0, 1.0);
+        }
+    )";
 
     Lexer lexer(test_shader);
     const std::vector<Token> tokens = lexer.tokenize();
@@ -77,12 +77,12 @@ void main() {
         << std::setw(8) << "COL" << "\n";
     std::cout << std::string(62, '-') << "\n";
 
-    for (const auto& token : tokens) {
+    for (const auto& [type, lexeme, line, column] : tokens) {
         std::cout << std::left
-            << std::setw(18) << token_type_to_string(token.type)
-            << std::setw(28) << (token.lexeme.empty() ? "<EOF>" : token.lexeme)
-            << std::setw(8) << token.line
-            << std::setw(8) << token.column << "\n";
+            << std::setw(18) << token_type_to_string(type)
+            << std::setw(28) << (lexeme.empty() ? "<EOF>" : lexeme)
+            << std::setw(8) << line
+            << std::setw(8) << column << "\n";
     }
 
     return 0;
