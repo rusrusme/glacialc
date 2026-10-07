@@ -1,0 +1,6 @@
+#include "A_common.bsh"
+#include "C_main.bsh" // CIRCULAR DEPENDENCY TRAP!
+
+vec3 calculate_light(PointLight light, vec3 normal) {
+    return light.color * max(dot(normal, vec3(0.0, 1.0, 0.0)), 0.0);
+}

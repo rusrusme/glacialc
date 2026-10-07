@@ -7,6 +7,7 @@
 
 #include <algorithm>
 #include <fstream>
+#include <sstream>
 
 #include "Utility.hpp"
 
@@ -60,16 +61,41 @@ namespace bshc {
         // -----------------------------------------------
         std::stringstream ss{std::string(source)};
         std::string line;
+        bool in_block_comment = false;
+
         while (std::getline(ss, line)) {
             std::string_view trimmed = trim(line);
 
-            if (trimmed.empty()) {
-                if (active_stage_idx == -1) {
-                    global_buffer += '\n';
+            if (in_block_comment) {
+                size_t comment_end = trimmed.find("*/");
+                if (comment_end != std::string_view::npos) {
+                    in_block_comment = false;
+                    trimmed = trim(trimmed.substr(comment_end + 2));
                 }
                 else {
-                    stage_buffers[active_stage_idx].second += '\n';
+                    if (active_stage_idx == -1) global_buffer += '\n';
+                    else stage_buffers[active_stage_idx].second += '\n';
+                    continue;
                 }
+            }
+
+            size_t comment_start = trimmed.find("/*");
+            if (comment_start != std::string_view::npos) {
+                size_t comment_end = trimmed.find("*/", comment_start + 2);
+                if (comment_end != std::string_view::npos) {
+                    std::string line_without_comment = std::string(trimmed.substr(0, comment_start)) +
+                        std::string(trimmed.substr(comment_end + 2));
+                    trimmed = trim(line_without_comment);
+                }
+                else {
+                    in_block_comment = true;
+                    trimmed = trim(trimmed.substr(0, comment_start));
+                }
+            }
+
+            if (trimmed.starts_with("//") || trimmed.empty()) {
+                if (active_stage_idx == -1) global_buffer += '\n';
+                else stage_buffers[active_stage_idx].second += '\n';
                 continue;
             }
 
@@ -129,14 +155,16 @@ namespace bshc {
                     continue;
                 }
 
-                std::ifstream file(target_path);
-                if (!file.is_open()) {
-                    result.success = false;
-                    result.error_message = "Failed to open include file: " + target_path.string();
-                    return;
+                std::string included_content;
+                {
+                    std::ifstream file(target_path);
+                    if (!file.is_open()) {
+                        result.success = false;
+                        result.error_message = "Failed to open include file: " + target_path.string();
+                        return;
+                    }
+                    included_content = std::string(std::istreambuf_iterator(file), {});
                 }
-
-                std::string included_content((std::istreambuf_iterator<char>(file)), {});
 
                 active_includes.insert(canonical_path);
                 process_source(included_content, target_path, global_buffer, stage_buffers, active_stage_idx, result, included_files, active_includes);

@@ -1,0 +1,33 @@
+// ==========================================
+// Edge Case Test: Fake Directives & Repeated Stages
+// ==========================================
+
+layout(binding = 0) uniform GlobalData {
+    mat4 u_VP;
+};
+
+// This is a comment containing #frag and #comp - MUST BE IGNORED
+/*
+   #geom
+   layout(location = 0) in vec4 dummy;
+*/
+
+#vert
+layout(location = 0) in vec3 a_Pos;
+layout(location = 0) out vec3 v_Pos;
+
+void main() {
+    v_Pos = a_Pos;
+
+#frag
+layout(location = 0) in vec3 v_Pos;
+layout(location = 0) out vec4 FragColor;
+
+void main() {
+    FragColor = vec4(v_Pos, 1.0);
+}
+
+// Re-opening vertex stage!
+#vert
+    gl_Position = u_VP * vec4(a_Pos, 1.0);
+}
