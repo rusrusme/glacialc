@@ -23,7 +23,7 @@ using Microsoft::WRL::ComPtr;
 #endif
 
 namespace bshc {
-    static shaderc_shader_kind to_shaderc_stage(ShaderStage stage) {
+    static shaderc_shader_kind to_shaderc_stage(const ShaderStage stage) {
         switch (stage) {
             case ShaderStage::Vertex   : return shaderc_glsl_vertex_shader;
             case ShaderStage::Fragment : return shaderc_glsl_fragment_shader;
@@ -33,7 +33,7 @@ namespace bshc {
         return shaderc_glsl_infer_from_source;
     }
 
-    static const wchar_t* get_dxc_target_profile(ShaderStage stage) {
+    static const wchar_t* get_dxc_target_profile(const ShaderStage stage) {
         switch (stage) {
             case ShaderStage::Vertex   : return L"vs_6_0";
             case ShaderStage::Fragment : return L"ps_6_0";
