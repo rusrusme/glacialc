@@ -25,7 +25,7 @@ int main(int argc, char* argv[]) {
     std::filesystem::path output_path = input_path;
     output_path.replace_extension(".bshb");
 
-    std::optional<RenderBackend> backend_override;
+    auto target_backend = RenderBackend::OpenGL;
 
     for (int i = 2; i < argc; ++i) {
         std::string_view arg = argv[i];
@@ -34,11 +34,12 @@ int main(int argc, char* argv[]) {
         }
         else if ((arg == "-b" || arg == "--backend") && i + 1 < argc) {
             std::string_view backend_str = argv[++i];
-            backend_override = parse_backend_string(backend_str);
-            if (!backend_override) {
+            auto parsed_backend = parse_backend_string(backend_str);
+            if (!parsed_backend) {
                 BSH_ERROR("Invalid backend target: '{}'. Valid options: opengl, vulkan, dx12", backend_str);
                 return 1;
             }
+            target_backend = *parsed_backend;
         }
     }
 
@@ -54,7 +55,6 @@ int main(int argc, char* argv[]) {
     }
 
     std::string source((std::istreambuf_iterator(file)), {});
-    file.close();
 
     Preprocessor preprocessor(input_path.parent_path());
     ParsedData parsed = preprocessor.process(source, input_path);
@@ -64,13 +64,11 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    if (backend_override) {
-        parsed.header.backend = *backend_override;
-    }
+    parsed.header.backend = target_backend;
 
-    Unique<Compiler> compiler = Compiler::create(parsed.header.backend);
+    Unique<Compiler> compiler = Compiler::create(target_backend);
     if (!compiler) {
-        BSH_ERROR("Unsupported or uncompiled render backend: {}", to_string(parsed.header.backend));
+        BSH_ERROR("Unsupported or uncompiled render backend: {}", to_string(target_backend));
         return 1;
     }
 
@@ -85,6 +83,10 @@ int main(int argc, char* argv[]) {
         BSH_ERROR("Failed to write binary output file: {}", output_path.string());
         return 1;
     }
-    BSH_MESSAGE("Successfully compiled {} to {}", input_path.filename().string(), output_path.filename().string());
+
+    BSH_MESSAGE("Successfully compiled {} [{}] to {}",
+                input_path.filename().string(),
+                to_string(target_backend),
+                output_path.filename().string());
     return 0;
 }
