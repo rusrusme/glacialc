@@ -32,8 +32,6 @@ int main() {
     }
 
     std::string root_source = R"(
-        @depth_test = true
-
         #include "file_a.glsl"
 
         #vert

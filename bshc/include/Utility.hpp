@@ -31,4 +31,14 @@ namespace bshc {
         if (str == "dx12"   || str == "d3d12" || str == "directx12") return RenderBackend::DX12;
         return std::nullopt;
     }
+
+    static std::string_view trim(std::string_view sv) {
+        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.front()))) {
+            sv.remove_prefix(1);
+        }
+        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.back()))) {
+            sv.remove_suffix(1);
+        }
+        return sv;
+    }
 }

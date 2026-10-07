@@ -20,10 +20,7 @@ namespace bshc {
             start_ = current_;
             const char c = peek();
 
-            if (c == '@') {
-                tokens.push_back(lex_metadata());
-            }
-            else if (c == '#') {
+            if (c == '#') {
                 tokens.push_back(lex_hash_directive());
             }
             else if (std::isalpha(c) || c == '_') {
@@ -142,12 +139,6 @@ namespace bshc {
             .line   = line_,
             .column = column_
         };
-    }
-
-    Token Lexer::lex_metadata() {
-        advance(); // Consume '@'
-        while (std::isalnum(peek()) || peek() == '_') advance();
-        return make_token(TokenType::META, current_ - start_);
     }
 
     Token Lexer::lex_hash_directive() {

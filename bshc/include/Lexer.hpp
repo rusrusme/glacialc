@@ -16,8 +16,6 @@ namespace bshc {
         GEOM,
         COMP,
 
-        META,
-
         INCLUDE,
         DEFINE,
         PRAGMA,
@@ -71,7 +69,6 @@ namespace bshc {
         [[nodiscard]] Token make_token(TokenType type, size_t length) const;
         [[nodiscard]] Token error_token(std::string_view message) const;
 
-        Token lex_metadata();
         Token lex_hash_directive();
         Token lex_identifier();
         Token lex_number();

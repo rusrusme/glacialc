@@ -12,11 +12,6 @@ using namespace bshc;
 
 int main() {
     constexpr std::string_view sample_shader = R"(
-        @depth_test = true
-        @depth_write = false
-        @cull_mode = back
-        @blend_mode = alpha
-
         // Shared layout across all stages
         layout(binding = 0) uniform Camera {
             mat4 view_proj;
@@ -45,10 +40,6 @@ int main() {
 
     std::cout << "--- BSHHeader State ---\n";
     std::cout << "Stage Count : " << static_cast<int>(header.stage_count) << "\n";
-    std::cout << "Depth Test  : " << static_cast<int>(header.depth_test) << "\n";
-    std::cout << "Depth Write : " << static_cast<int>(header.depth_write) << "\n";
-    std::cout << "Cull Mode   : " << static_cast<int>(header.cull_mode) << "\n";
-    std::cout << "Blend Mode  : " << static_cast<int>(header.blend_mode) << "\n\n";
 
     for (size_t i = 0; i < stages.size(); ++i) {
         std::cout << "--- Stage " << i << " (Type: " << static_cast<int>(stages[i].stage) << ") GLSL Source ---\n";

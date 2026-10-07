@@ -6,62 +6,60 @@
 #include "Preprocessor.hpp"
 
 #include <algorithm>
-#include <cctype>
 #include <fstream>
-#include <sstream>
+
+#include "Utility.hpp"
 
 namespace bshc {
-    static std::string_view trim(std::string_view sv) {
-        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.front()))) {
-            sv.remove_prefix(1);
-        }
-        while (!sv.empty() && std::isspace(static_cast<unsigned char>(sv.back()))) {
-            sv.remove_suffix(1);
-        }
-        return sv;
-    }
+    Preprocessor::Preprocessor(std::filesystem::path include_dir)
+        : include_dir_(std::move(include_dir)) {}
 
-    Preprocessor::Preprocessor(std::filesystem::path include_dir) : include_dir_(std::move(include_dir)) {}
-
-    ParsedData Preprocessor::process(std::string_view source, const std::filesystem::path& current_file_path) {
+    ParsedData Preprocessor::process(const std::string_view& source, const std::filesystem::path& current_file_path) {
         ParsedData result;
-        included_files_.clear();
-        active_includes_.clear();
+        std::unordered_set<std::string> included_files;
+        std::unordered_set<std::string> active_includes;
 
-        if (!current_file_path.empty()) {
-            const std::string root_canonical = std::filesystem::canonical(current_file_path).string();
-            active_includes_.insert(root_canonical);
+        if (!current_file_path.empty() && std::filesystem::exists(current_file_path)) {
+            active_includes.insert(std::filesystem::canonical(current_file_path).string());
         }
 
         std::string global_buffer;
         std::vector<std::pair<ShaderStage, std::string>> stage_buffers;
-        int active_stage_idx = -1;
 
-        process_source(source, current_file_path, result.header, global_buffer, stage_buffers, active_stage_idx, result);
+        process_source(source, current_file_path, global_buffer, stage_buffers, -1, result, included_files, active_includes);
 
-        if (!result.success) {
-            return result;
-        }
+        if (!result.success) { return result; }
 
         result.header.stage_count = static_cast<uint8_t>(stage_buffers.size());
 
+        result.stages.reserve(stage_buffers.size());
         for (auto& [stage, stage_code] : stage_buffers) {
             std::string final_source = global_buffer;
-            final_source += '\n';
+            if (!global_buffer.empty() && !global_buffer.ends_with('\n')) {
+                final_source += '\n';
+            }
             final_source += stage_code;
-            result.stages.push_back(CompiledStageSource{
-                .stage       = stage,
+
+            result.stages.push_back(PreprocessedStage{
+                .stage  = stage,
                 .source = std::move(final_source)
             });
         }
-
         return result;
     }
 
-    void Preprocessor::process_source(std::string_view source, const std::filesystem::path& current_file_path, BSHHeader& header, std::string& global_buffer, std::vector<std::pair<ShaderStage, std::string>>& stage_buffers, int& active_stage_idx, ParsedData& result) {
+    void Preprocessor::process_source(
+        std::string_view source,
+        const std::filesystem::path& current_file_path,
+        std::string& global_buffer,
+        std::vector<std::pair<ShaderStage, std::string>>& stage_buffers,
+        int active_stage_idx,
+        ParsedData& result,
+        std::unordered_set<std::string>& included_files,
+        std::unordered_set<std::string>& active_includes) {
+        // -----------------------------------------------
         std::stringstream ss{std::string(source)};
         std::string line;
-
         while (std::getline(ss, line)) {
             std::string_view trimmed = trim(line);
 
@@ -75,15 +73,13 @@ namespace bshc {
                 continue;
             }
 
-            // Pragmas (#pragma once)
             if (trimmed == "#pragma once") {
-                if (!current_file_path.empty()) {
-                    included_files_.insert(std::filesystem::canonical(current_file_path).string());
+                if (!current_file_path.empty() && std::filesystem::exists(current_file_path)) {
+                    included_files.insert(std::filesystem::canonical(current_file_path).string());
                 }
                 continue;
             }
 
-            // Stage Directives (#vert, #frag, #geom, #comp)
             if (trimmed == "#vert" || trimmed == "#frag" || trimmed == "#geom" || trimmed == "#comp") {
                 auto stage = ShaderStage::Vertex;
                 if (trimmed == "#frag") stage = ShaderStage::Fragment;
@@ -95,7 +91,6 @@ namespace bshc {
                 continue;
             }
 
-            // Include Directives (#include "...")
             if (trimmed.starts_with("#include")) {
                 size_t first_quote = trimmed.find('"');
                 size_t last_quote = trimmed.rfind('"');
@@ -124,15 +119,13 @@ namespace bshc {
 
                 std::string canonical_path = std::filesystem::canonical(target_path).string();
 
-                // Circular Dependency Guard
-                if (active_includes_.contains(canonical_path)) {
+                if (active_includes.contains(canonical_path)) {
                     result.success = false;
                     result.error_message = "Circular #include dependency detected: " + canonical_path;
                     return;
                 }
 
-                // Skip if guarded by #pragma once
-                if (included_files_.contains(canonical_path)) {
+                if (included_files.contains(canonical_path)) {
                     continue;
                 }
 
@@ -143,12 +136,11 @@ namespace bshc {
                     return;
                 }
 
-                std::string included_content((std::istreambuf_iterator(file)), std::istreambuf_iterator<char>());
+                std::string included_content((std::istreambuf_iterator<char>(file)), {});
 
-                // Push onto active include stack for recursion, then pop
-                active_includes_.insert(canonical_path);
-                process_source(included_content, target_path, header, global_buffer, stage_buffers, active_stage_idx, result);
-                active_includes_.erase(canonical_path);
+                active_includes.insert(canonical_path);
+                process_source(included_content, target_path, global_buffer, stage_buffers, active_stage_idx, result, included_files, active_includes);
+                active_includes.erase(canonical_path);
 
                 if (!result.success) {
                     return;
@@ -156,7 +148,6 @@ namespace bshc {
                 continue;
             }
 
-            // 5. Regular GLSL Code Line
             if (active_stage_idx == -1) {
                 global_buffer += line + "\n";
             }

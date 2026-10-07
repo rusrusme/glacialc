@@ -17,7 +17,6 @@ static constexpr std::string_view token_type_to_string(const TokenType type) {
         case TokenType::FRAG : return "FRAG";
         case TokenType::GEOM : return "GEOM";
         case TokenType::COMP : return "COMP";
-        case TokenType::META : return "META";
         case TokenType::INCLUDE : return "INCLUDE";
         case TokenType::DEFINE : return "DEFINE";
         case TokenType::PRAGMA : return "PRAGMA";
@@ -47,9 +46,6 @@ static constexpr std::string_view token_type_to_string(const TokenType type) {
 int main() {
     constexpr std::string_view test_shader = R"(
         // Sample Basis Shader File
-        @depth_test
-        @cull_mode = 2
-
         #include "common/camera.glsl"
 
         #vert
