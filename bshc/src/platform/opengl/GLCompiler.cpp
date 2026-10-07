@@ -5,8 +5,6 @@
 
 #include "platform/opengl/GLCompiler.hpp"
 
-#include <regex>
-
 namespace bshc {
     CompilerOutput GLCompiler::compile(const ParsedData& data) {
         CompilerOutput output;
@@ -40,16 +38,7 @@ namespace bshc {
         if (!raw_source.starts_with("#version")) {
             glsl += "#version 450 core\n\n";
         }
-
-        std::string source_str{raw_source};
-
-        static const std::regex set_qualifier_regex(R"(set\s*=\s*\d+\s*,?\s*)");
-        source_str = std::regex_replace(source_str, set_qualifier_regex, "");
-
-        static const std::regex empty_comma_regex(R"(layout\s*\(\s*,\s*)");
-        source_str = std::regex_replace(source_str, empty_comma_regex, "layout(");
-
-        glsl += source_str;
+        glsl += raw_source;
         return glsl;
     }
 } // bshc
