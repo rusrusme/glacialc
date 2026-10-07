@@ -105,13 +105,14 @@ namespace bshc {
                         while (peek() != '\n' && !is_at_end()) advance();
                     }
                     else if (peek_next() == '*') {
-                        advance();
-                        advance();
-                        while (!(peek() == '*' && peek_next() == '/') && !is_at_end()) {
-                            advance();
-                        }
-                        if (!is_at_end()) {
-                            advance();
+                        advance(); // Consume '/'
+                        advance(); // Consume '*'
+                        while (!is_at_end()) {
+                            if (peek() == '*' && peek_next() == '/') {
+                                advance(); // Consume '*'
+                                advance(); // Consume '/'
+                                break;
+                            }
                             advance();
                         }
                     }
