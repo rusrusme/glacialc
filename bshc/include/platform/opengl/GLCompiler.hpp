@@ -14,5 +14,8 @@ namespace bshc {
         ~GLCompiler() override = default;
 
         CompilerOutput compile(const ParsedData& data) override;
+
+    private:
+        std::string process_glsl_source(std::string_view raw_source, ShaderStage stage);
     };
 } // bshc
