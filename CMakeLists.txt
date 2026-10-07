@@ -22,31 +22,18 @@ add_library(bshc_core STATIC
             bshc/include/platform/vulkan/VulkanCompiler.hpp
             bshc/src/platform/dx12/DX12Compiler.cpp
             bshc/include/platform/dx12/DX12Compiler.hpp
-            bshc/include/CompilerOutput.hpp
+            bshc/src/BinaryPackager.cpp
+            bshc/include/BinaryPackager.hpp
+            bshc/src/Compiler.cpp
+            bshc/include/Utility.hpp
 )
 target_include_directories(bshc_core
                            PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/bshc/include
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/bshc/src
 )
 # ----------------------------------------------------------------------------
-set(RENDER_API "OPENGL" CACHE STRING "Selects the rendering backend")
-set_property(CACHE RENDER_API PROPERTY STRINGS "OPENGL" "VULKAN" "DX12")
-if (RENDER_API STREQUAL "OPENGL")
-    target_compile_definitions(bshc_core PUBLIC RENDER_API_OPENGL)
-    find_package(OpenGL REQUIRED)
-elseif (RENDER_API STREQUAL "VULKAN")
-    target_compile_definitions(bshc_core PUBLIC RENDER_API_VULKAN)
-    include(Vulkan.cmake)
-    target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
-elseif (RENDER_API STREQUAL "DX12")
-    if (NOT WIN32)
-        message(FATAL_ERROR "DirectX 12 is only supported on Windows")
-    endif ()
-    target_compile_definitions(bshc_core PUBLIC RENDER_API_DX12)
-    target_link_libraries(bshc_core PUBLIC d3d12.lib dxgi.lib dxguid.lib)
-else ()
-    message(FATAL_ERROR "Unsupported Render API: ${RENDER_API}")
-endif ()
+include(RenderBackend.cmake)
+target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
 # ----------------------------------------------------------------------------
 add_executable(BSHC bshc/src/BSH.cpp
                bshc/include/Log.hpp)

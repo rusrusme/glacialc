@@ -5,22 +5,32 @@
 
 #pragma once
 
-#if defined(RENDER_API_OPENGL)
-#include "platform/opengl/GLCompiler.hpp"
+#include <cstdint>
+#include <string>
+#include <vector>
+
+#include "Preprocessor.hpp"
+#include "Utility.hpp"
 
 namespace bshc {
-    using Compiler = GLCompiler;
-}
-#elif defined(RENDER_API_vulkan)
-#include "platform/vulkan/vulkanCompiler.hpp"
+    struct CompiledStage {
+        ShaderStage stage;
+        std::vector<uint8_t> payload;
+    };
 
-namespace bshc {
-    using Compiler = VulkanCompiler;
-}
-#elif defined(RENDER_API_DX12)
-#include "platform/dx12/DX12Compiler.hpp"
+    struct CompilerOutput {
+        bool success = true;
+        std::string error_message;
+        std::vector<CompiledStage> stages;
+    };
 
-namespace bshc {
-    using Compiler = DX12Compiler;
+    class Compiler {
+    public:
+        Compiler() = default;
+        virtual ~Compiler() = default;
+
+        virtual CompilerOutput compile(const ParsedData& data) = 0;
+
+        static Unique<Compiler> create(const RenderBackend& render_backend);
+    };
 }
-#endif

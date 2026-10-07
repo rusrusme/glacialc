@@ -1,5 +1,6 @@
-# Vulkan.cmake
+# RenderBackend.cmake
 # ----------------------------------------------------------------------------
+find_package(OpenGL REQUIRED)
 find_package(Vulkan REQUIRED)
 # ----------------------------------------------------------------------------
 if(TARGET Vulkan::shaderc_combined)
@@ -17,4 +18,9 @@ else()
                           INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}"
     )
 endif()
+# ----------------------------------------------------------------------------
+if (WIN32)
+    target_compile_definitions(bshc_core PUBLIC RENDER_API_DX12)
+    target_link_libraries(bshc_core PUBLIC d3d12.lib dxgi.lib dxguid.lib)
+endif ()
 # ----------------------------------------------------------------------------

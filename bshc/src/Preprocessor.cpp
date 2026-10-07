@@ -85,10 +85,10 @@ namespace bshc {
 
             // Stage Directives (#vert, #frag, #geom, #comp)
             if (trimmed == "#vert" || trimmed == "#frag" || trimmed == "#geom" || trimmed == "#comp") {
-                auto stage = ShaderStage::VERTEX;
-                if (trimmed == "#frag") stage = ShaderStage::FRAGMENT;
-                else if (trimmed == "#geom") stage = ShaderStage::GEOMETRY;
-                else if (trimmed == "#comp") stage = ShaderStage::COMPUTE;
+                auto stage = ShaderStage::Vertex;
+                if (trimmed == "#frag") stage = ShaderStage::Fragment;
+                else if (trimmed == "#geom") stage = ShaderStage::Geometry;
+                else if (trimmed == "#comp") stage = ShaderStage::Compute;
 
                 stage_buffers.emplace_back(stage, "");
                 active_stage_idx = static_cast<int>(stage_buffers.size()) - 1;

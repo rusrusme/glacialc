@@ -6,7 +6,14 @@
 
 #pragma once
 
+#include "Compiler.hpp"
+
 namespace bshc {
-    class vulkanCompiler {
+    class VulkanCompiler : public Compiler {
+    public:
+        VulkanCompiler() = default;
+        ~VulkanCompiler() override = default;
+
+        CompilerOutput compile(const ParsedData& data) override;
     };
 } // bshc
