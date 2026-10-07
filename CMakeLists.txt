@@ -1,44 +1,51 @@
 # CMakeLists.txt
 # ----------------------------------------------------------------------------
-cmake_minimum_required(VERSION 4.3)
+cmake_minimum_required(VERSION 3.20)
+project(BasisShaderCompiler
+        VERSION 1.0.0
+        DESCRIPTION "C++20 multi-backend shader compiler"
+        LANGUAGES CXX
+)
 # ----------------------------------------------------------------------------
-project(BasisShaderCompiler LANGUAGES CXX)
-set(CMAKE_CXX_STANDARD 20)
+option(BSHC_BUILD_EXECUTABLE "Build the BSHC command-line tool" ${PROJECT_IS_TOP_LEVEL})
+option(BSHC_BUILD_TESTS      "Build test suite"                 ${PROJECT_IS_TOP_LEVEL})
 # ----------------------------------------------------------------------------
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
-set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+if (PROJECT_IS_TOP_LEVEL)
+    set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+    set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/lib)
+    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_BINARY_DIR}/bin)
+endif ()
 # ----------------------------------------------------------------------------
 add_library(bshc_core STATIC
             bshc/src/Lexer.cpp
-            bshc/include/Lexer.hpp
-            bshc/include/BSH.hpp
             bshc/src/Preprocessor.cpp
-            bshc/include/Preprocessor.hpp
-            bshc/include/Compiler.hpp
-            bshc/src/platform/OpenGL/GLCompiler.cpp
-            bshc/include/platform/OpenGL/GLCompiler.hpp
-            bshc/src/platform/vulkan/VulkanCompiler.cpp
-            bshc/include/platform/vulkan/VulkanCompiler.hpp
-            bshc/src/platform/dx12/DX12Compiler.cpp
-            bshc/include/platform/dx12/DX12Compiler.hpp
-            bshc/src/BinaryPackager.cpp
-            bshc/include/BinaryPackager.hpp
             bshc/src/Compiler.cpp
-            bshc/include/Utility.hpp
+            bshc/src/BinaryPackager.cpp
+            bshc/src/platform/opengl/GLCompiler.cpp
+            bshc/src/platform/vulkan/VulkanCompiler.cpp
+            bshc/src/platform/dx12/DX12Compiler.cpp
 )
+add_library(bshc::bshc_core ALIAS bshc_core)
+target_compile_features(bshc_core PUBLIC cxx_std_20)
 target_include_directories(bshc_core
-                           PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/bshc/include
+                           PUBLIC  ${CMAKE_CURRENT_SOURCE_DIR}/bshc/include
                            PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/bshc/src
 )
 # ----------------------------------------------------------------------------
 include(RenderBackend.cmake)
 target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc spirv-cross-hlsl)
 # ----------------------------------------------------------------------------
-add_executable(BSHC bshc/src/BSH.cpp
-               bshc/include/Log.hpp)
+if (BSHC_BUILD_EXECUTABLE)
+    add_executable(BSHC
+                   bshc/src/BSH.cpp
+                   bshc/include/Log.hpp
+    )
+    add_executable(bshc::BSHC ALIAS BSHC)
+    target_link_libraries(BSHC PRIVATE bshc_core)
+endif ()
 # ----------------------------------------------------------------------------
-target_link_libraries(BSHC PRIVATE bshc_core)
-# ----------------------------------------------------------------------------
-add_subdirectory(test)
+if (BSHC_BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(test)
+endif ()
 # ----------------------------------------------------------------------------
