@@ -23,8 +23,8 @@ namespace bshc {
 
     Preprocessor::Preprocessor(std::filesystem::path include_dir) : include_dir_(std::move(include_dir)) {}
 
-    ParseResult Preprocessor::process(std::string_view source, const std::filesystem::path& current_file_path) {
-        ParseResult result;
+    ParsedData Preprocessor::process(std::string_view source, const std::filesystem::path& current_file_path) {
+        ParsedData result;
         included_files_.clear();
         active_includes_.clear();
 
@@ -51,14 +51,14 @@ namespace bshc {
             final_source += stage_code;
             result.stages.push_back(CompiledStageSource{
                 .stage       = stage,
-                .glsl_source = std::move(final_source)
+                .source = std::move(final_source)
             });
         }
 
         return result;
     }
 
-    void Preprocessor::process_source(std::string_view source, const std::filesystem::path& current_file_path, BSHHeader& header, std::string& global_buffer, std::vector<std::pair<ShaderStage, std::string>>& stage_buffers, int& active_stage_idx, ParseResult& result) {
+    void Preprocessor::process_source(std::string_view source, const std::filesystem::path& current_file_path, BSHHeader& header, std::string& global_buffer, std::vector<std::pair<ShaderStage, std::string>>& stage_buffers, int& active_stage_idx, ParsedData& result) {
         std::stringstream ss{std::string(source)};
         std::string line;
 
@@ -72,12 +72,6 @@ namespace bshc {
                 else {
                     stage_buffers[active_stage_idx].second += '\n';
                 }
-                continue;
-            }
-
-            // Metadata Annotations (@depth_test, @cull_mode, etc.)
-            if (trimmed.starts_with('@')) {
-                parse_metadata_directive(trimmed, header);
                 continue;
             }
 
@@ -169,38 +163,6 @@ namespace bshc {
             else {
                 stage_buffers[active_stage_idx].second += line + "\n";
             }
-        }
-    }
-
-    void Preprocessor::parse_metadata_directive(std::string_view line, BSHHeader& header) {
-        // Strip leading '@'
-        line.remove_prefix(1);
-        std::string_view trimmed = trim(line);
-
-        std::string_view key = trimmed;
-        std::string_view val;
-
-        const size_t eq_pos = trimmed.find('=');
-        if (eq_pos != std::string_view::npos) {
-            key = trim(trimmed.substr(0, eq_pos));
-            val = trim(trimmed.substr(eq_pos + 1));
-        }
-
-        if (key == "depth_test") {
-            header.depth_test = (val.empty() || val == "true" || val == "1") ? 1 : 0;
-        }
-        else if (key == "depth_write") {
-            header.depth_write = (val.empty() || val == "true" || val == "1") ? 1 : 0;
-        }
-        else if (key == "cull_mode") {
-            if (val == "none" || val == "0") header.cull_mode = 0;
-            else if (val == "front" || val == "1") header.cull_mode = 1;
-            else if (val == "back" || val == "2") header.cull_mode = 2;
-        }
-        else if (key == "blend_mode") {
-            if (val == "opaque" || val == "0") header.blend_mode = 0;
-            else if (val == "alpha" || val == "1") header.blend_mode = 1;
-            else if (val == "additive" || val == "2") header.blend_mode = 2;
         }
     }
 } // bshc

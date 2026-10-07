@@ -46,7 +46,7 @@ int main() {
     }
 
     Preprocessor preprocessor(temp_dir);
-    ParseResult result = preprocessor.process(root_source, main_shader_path);
+    ParsedData result = preprocessor.process(root_source, main_shader_path);
 
     fs::remove_all(temp_dir);
 

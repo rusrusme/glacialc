@@ -52,7 +52,7 @@ int main() {
 
     for (size_t i = 0; i < stages.size(); ++i) {
         std::cout << "--- Stage " << i << " (Type: " << static_cast<int>(stages[i].stage) << ") GLSL Source ---\n";
-        std::cout << stages[i].glsl_source << "\n";
+        std::cout << stages[i].source << "\n";
     }
 
     return 0;

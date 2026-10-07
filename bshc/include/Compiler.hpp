@@ -5,25 +5,22 @@
 
 #pragma once
 
-#include <filesystem>
-#include <string>
-#include <string_view>
-#include <vector>
-
-#include "Preprocessor.hpp"
+#if defined(RENDER_API_OPENGL)
+#include "platform/opengl/GLCompiler.hpp"
 
 namespace bshc {
-    struct CompileResult {
-        bool success = true;
-        std::string error_message;
-        std::vector<uint8_t> binary_data;
-    };
+    using Compiler = GLCompiler;
+}
+#elif defined(RENDER_API_vulkan)
+#include "platform/vulkan/vulkanCompiler.hpp"
 
-    class Compiler {
-    public:
-        Compiler() = default;
+namespace bshc {
+    using Compiler = VulkanCompiler;
+}
+#elif defined(RENDER_API_DX12)
+#include "platform/dx12/DX12Compiler.hpp"
 
-        CompileResult compile(const ParseResult& parse_result, std::string_view source_filename = "shader.bsh");
-        bool compile_to_file(const ParseResult& parse_result, const std::filesystem::path& output_path, std::string_view source_filename = "shader.bsh");
-    };
-} // bshc
+namespace bshc {
+    using Compiler = DX12Compiler;
+}
+#endif

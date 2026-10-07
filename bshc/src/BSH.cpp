@@ -56,6 +56,6 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    BSH_MESSAGE("Successfully compiled {} -> {}", input_path.filename().string(), output_path.filename().string());
+    BSH_MESSAGE("Successfully compiled {} to {}", input_path.filename().string(), output_path.filename().string());
     return 0;
 }

@@ -32,7 +32,7 @@ int main() {
     )";
 
     Preprocessor preprocessor;
-    const ParseResult parse_result = preprocessor.process(sample_shader);
+    const ParsedData parse_result = preprocessor.process(sample_shader);
 
     Compiler compiler;
     auto [success, error_message, binary_data] = compiler.compile(parse_result, "pbr_shader.bsh");
