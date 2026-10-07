@@ -5,13 +5,18 @@
 
 #include "platform/dx12/DX12Compiler.hpp"
 
+#include <spirv_hlsl.hpp>
 #include <shaderc/shaderc.hpp>
 
-#include <spirv_hlsl.hpp>
-
 #if defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
-
+#include <unknwn.h>
 #include <dxcapi.h>
 #include <wrl/client.h>
 using Microsoft::WRL::ComPtr;
@@ -20,20 +25,20 @@ using Microsoft::WRL::ComPtr;
 namespace bshc {
     static shaderc_shader_kind to_shaderc_stage(ShaderStage stage) {
         switch (stage) {
-            case ShaderStage::Vertex : return shaderc_glsl_vertex_shader;
+            case ShaderStage::Vertex   : return shaderc_glsl_vertex_shader;
             case ShaderStage::Fragment : return shaderc_glsl_fragment_shader;
             case ShaderStage::Geometry : return shaderc_glsl_geometry_shader;
-            case ShaderStage::Compute : return shaderc_glsl_compute_shader;
+            case ShaderStage::Compute  : return shaderc_glsl_compute_shader;
         }
         return shaderc_glsl_infer_from_source;
     }
 
     static const wchar_t* get_dxc_target_profile(ShaderStage stage) {
         switch (stage) {
-            case ShaderStage::Vertex : return L"vs_6_0";
+            case ShaderStage::Vertex   : return L"vs_6_0";
             case ShaderStage::Fragment : return L"ps_6_0";
             case ShaderStage::Geometry : return L"gs_6_0";
-            case ShaderStage::Compute : return L"cs_6_0";
+            case ShaderStage::Compute  : return L"cs_6_0";
         }
         return L"vs_6_0";
     }
@@ -93,7 +98,7 @@ namespace bshc {
             spirv_cross::CompilerHLSL hlsl_compiler(std::move(spirv_words));
 
             spirv_cross::CompilerHLSL::Options hlsl_options;
-            hlsl_options.shader_model = 60; // Shader Model 6.0 (DX12 Standard)
+            hlsl_options.shader_model = 60;
             hlsl_compiler.set_hlsl_options(hlsl_options);
 
             std::string hlsl_source;
@@ -134,25 +139,36 @@ namespace bshc {
                 IID_PPV_ARGS(&dxc_result)
             );
 
+            HRESULT status_hr = S_OK;
+            if (dxc_result) {
+                dxc_result->GetStatus(&status_hr);
+            }
+
             ComPtr<IDxcBlobUtf8> errors;
-            if (SUCCEEDED(hr) && dxc_result) {
+            if (dxc_result) {
                 dxc_result->GetOutput(DXC_OUT_ERRORS, IID_PPV_ARGS(&errors), nullptr);
             }
 
-            if (errors && errors->GetStringLength() > 0) {
-                if (FAILED(hr) || (dxc_result && FAILED(dxc_result->GetStatus(&hr)))) {
-                    output.success = false;
-                    output.error_message = "DX12 Stage 3 (HLSL->DXIL) Error:\n";
+            if (FAILED(hr) || FAILED(status_hr)) {
+                output.success = false;
+                output.error_message = "DX12 Stage 3 (HLSL->DXIL) Error:\n";
+                if (errors && errors->GetStringLength() > 0) {
                     output.error_message += errors->GetStringPointer();
-                    return output;
+                } else {
+                    output.error_message += "Unknown DXC compilation failure.";
                 }
+                return output;
             }
 
             ComPtr<IDxcBlob> dxil_blob;
-            dxc_result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&dxil_blob), nullptr);
+            if (FAILED(dxc_result->GetOutput(DXC_OUT_OBJECT, IID_PPV_ARGS(&dxil_blob), nullptr)) || !dxil_blob) {
+                output.success = false;
+                output.error_message = "DX12 Stage 3 (HLSL->DXIL) Error: Failed to retrieve DXIL byte blob.";
+                return output;
+            }
 
             const auto* dxil_begin = static_cast<const uint8_t*>(dxil_blob->GetBufferPointer());
-            const auto* dxil_end = dxil_begin + dxil_blob->GetBufferSize();
+            const auto* dxil_end   = dxil_begin + dxil_blob->GetBufferSize();
             payload.assign(dxil_begin, dxil_end);
             #else
             payload.assign(hlsl_source.begin(), hlsl_source.end());
