@@ -5,17 +5,16 @@
 
 #include <filesystem>
 #include <fstream>
-#include <iostream>
 
 #include "Compiler.hpp"
+#include "Log.hpp"
 #include "Preprocessor.hpp"
 
 using namespace bshc;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        std::cout << "Basis Shader Compiler (bshc)\n";
-        std::cout << "Usage: bshc <input_path.bsh> [-o <output_path.bshb>]\n";
+        BSH_MESSAGE("Usage: bshc <shader.bsh> [-o <output_path.bshb>]");
         return 0;
     }
 
@@ -31,34 +30,32 @@ int main(int argc, char* argv[]) {
     }
 
     if (!std::filesystem::exists(input_path)) {
-        std::cerr << "Error: Input file does not exist: " << input_path.string() << "\n";
+        BSH_ERROR("Input file does not exist: {}", input_path.string());
         return 1;
     }
 
     std::ifstream file(input_path);
     if (!file.is_open()) {
-        std::cerr << "Error: Failed to open file: " << input_path.string() << "\n";
+        BSH_ERROR("Failed to open file: {}", input_path.string());
         return 1;
     }
 
     std::string source((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
 
     Preprocessor preprocessor(input_path.parent_path());
-    ParseResult parse_result = preprocessor.process(source, input_path);
+    ParsedData parsed_data = preprocessor.process(source, input_path);
 
-    if (!parse_result.success) {
-        std::cerr << "Preprocessing Error:\n" << parse_result.error_message << "\n";
+    if (!parsed_data.success) {
+        BSH_ERROR("Preprocessing Error: {}", parsed_data.error_message);
         return 1;
     }
 
     Compiler compiler;
-    if (!compiler.compile_to_file(parse_result, output_path, input_path.filename().string())) {
-        std::cerr << "Error: Failed to compile and write binary to " << output_path.string() << "\n";
+    if (!compiler.compile_to_file(parsed_data, output_path, input_path.filename().string())) {
+        BSH_ERROR("Failed to compile and write binary to {}", output_path.string());
         return 1;
     }
 
-    std::cout << "Successfully compiled " << input_path.filename().string()
-        << " -> " << output_path.filename().string() << "\n";
-
+    BSH_MESSAGE("Successfully compiled {} -> {}", input_path.filename().string(), output_path.filename().string());
     return 0;
 }

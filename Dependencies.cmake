@@ -1,6 +1,7 @@
 # Dependencies.cmake
+# ----------------------------------------------------------------------------
 find_package(Vulkan REQUIRED)
-
+# ----------------------------------------------------------------------------
 if(TARGET Vulkan::shaderc_combined)
     add_library(Vulkan::Shaderc ALIAS Vulkan::shaderc_combined)
 elseif(TARGET Vulkan::shaderc_shared)
@@ -16,3 +17,4 @@ else()
                           INTERFACE_INCLUDE_DIRECTORIES "${Vulkan_INCLUDE_DIRS}"
     )
 endif()
+# ----------------------------------------------------------------------------

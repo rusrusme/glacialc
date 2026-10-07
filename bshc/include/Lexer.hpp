@@ -56,6 +56,8 @@ namespace bshc {
     class Lexer {
     public:
         explicit Lexer(std::string_view source);
+        ~Lexer() = default;
+
         std::vector<Token> tokenize();
 
     private:
@@ -66,8 +68,8 @@ namespace bshc {
 
         void skip();
 
-        Token make_token(TokenType type, size_t length) const;
-        Token error_token(std::string_view message) const;
+        [[nodiscard]] Token make_token(TokenType type, size_t length) const;
+        [[nodiscard]] Token error_token(std::string_view message) const;
 
         Token lex_metadata();
         Token lex_hash_directive();
