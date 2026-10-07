@@ -33,7 +33,7 @@ target_include_directories(bshc_core
 )
 # ----------------------------------------------------------------------------
 include(RenderBackend.cmake)
-target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc)
+target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc spirv-cross-hlsl)
 # ----------------------------------------------------------------------------
 add_executable(BSHC bshc/src/BSH.cpp
                bshc/include/Log.hpp)
