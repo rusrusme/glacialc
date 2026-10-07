@@ -1,6 +1,6 @@
 # BSHC — Basis Shader Compiler
 
-**BSHC** is a lightweight, high-performance, platform-agnostic shader compilation pipeline written in C++20 It allows game developers to write unified multi-stage shaders (`bsh`) and compile them into a compact, contiguous binary format (`bshb`) targeting **OpenGL**, **Vulkan**, and **DirectX 12**
+**BSHC** is a lightweight, high-performance, platform-agnostic shader compilation pipeline written in C++20. It allows game developers to write unified multi-stage shaders (`bsh`) and compile them into a compact, contiguous binary format (`bshb`) targeting **OpenGL**, **Vulkan**, and **DirectX 12**
 
 ---
 
@@ -79,6 +79,20 @@ mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 ```
+
+## Adding BSHC to a Project
+```cmake
+include(FetchContent)
+FetchContent_Declare(
+        BasisShaderCompiler
+        GIT_REPOSITORY https://github.com/rusrusme/BasisShaderCompiler.git
+        GIT_TAG v1.0.2
+)
+FetchContent_MakeAvailable(BasisShaderCompiler)
+# ...
+target_link_libraries(<PROJECT> PRIVATE bshc::bshc_core)
+```
+
 ---
 CLI Command Line Usage
 ```bash
