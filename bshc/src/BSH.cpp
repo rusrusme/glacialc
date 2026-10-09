@@ -125,7 +125,7 @@ int main(int argc, char* argv[]) {
 
         if (!explicit_out.empty()) {
             if (is_multi_file || std::filesystem::is_directory(explicit_out) || explicit_out.extension().empty()) {
-                out_path = explicit_out / input.filename();
+                out_path = input.is_relative() ? explicit_out / input : explicit_out / input.filename();
                 out_path.replace_extension(".bshb");
             }
             else {
