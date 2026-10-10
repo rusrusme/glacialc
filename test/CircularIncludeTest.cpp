@@ -7,7 +7,7 @@
 #include <fstream>
 #include <filesystem>
 
-#include "Preprocessor.hpp"
+#include "../bshc/include/bshc/Preprocessor.hpp"
 
 using namespace bshc;
 

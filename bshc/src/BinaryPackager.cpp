@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-#include "BinaryPackager.hpp"
+#include "bshc/BinaryPackager.hpp"
 
 #include <fstream>
 

@@ -3,83 +3,15 @@
 // All rights reserved.
 //
 
-#include <algorithm>
-#include <atomic>
-#include <execution>
 #include <filesystem>
-#include <fstream>
 #include <string_view>
 #include <vector>
 
-#include "BinaryPackager.hpp"
-#include "Compiler.hpp"
-#include "Log.hpp"
-#include "Preprocessor.hpp"
-#include "Utility.hpp"
+#include "bshc/BSHCompiler.hpp"
+#include "bshc/Log.hpp"
+#include "bshc/Utility.hpp"
 
 using namespace bshc;
-
-namespace {
-    struct ShaderJob {
-        std::filesystem::path input;
-        std::filesystem::path output;
-    };
-}
-
-static bool compile_single_shader(const std::filesystem::path& input_path,
-                                  const std::filesystem::path& output_path,
-                                  RenderBackend target_backend) {
-    if (!std::filesystem::exists(input_path)) {
-        BSH_ERROR("Input file does not exist: {}", input_path.string());
-        return false;
-    }
-
-    std::ifstream file(input_path);
-    if (!file.is_open()) {
-        BSH_ERROR("Failed to open file: {}", input_path.string());
-        return false;
-    }
-
-    std::string source((std::istreambuf_iterator(file)), {});
-
-    Preprocessor preprocessor(input_path.parent_path());
-    ParsedData parsed = preprocessor.process(source, input_path);
-
-    if (!parsed.success) {
-        BSH_ERROR("Preprocessing Error [{}]: {}", input_path.filename().string(), parsed.error_message);
-        return false;
-    }
-
-    parsed.header.backend = target_backend;
-
-    Unique<Compiler> compiler = Compiler::create(target_backend);
-    if (!compiler) {
-        BSH_ERROR("Unsupported or uncompiled render backend: {}", to_string(target_backend));
-        return false;
-    }
-
-    CompilerOutput compiled = compiler->compile(parsed);
-    if (!compiled.success) {
-        BSH_ERROR("Compilation Error [{}]: {}", input_path.filename().string(), compiled.error_message);
-        return false;
-    }
-
-    if (output_path.has_parent_path()) {
-        std::filesystem::create_directories(output_path.parent_path());
-    }
-
-    auto bin = BinaryPackager::package_binary(parsed.header, compiled.stages);
-    if (!BinaryPackager::save(output_path, bin)) {
-        BSH_ERROR("Failed to write binary output file: {}", output_path.string());
-        return false;
-    }
-
-    BSH_MESSAGE("Successfully compiled {} [{}] to {}",
-                input_path.filename().string(),
-                to_string(target_backend),
-                output_path.filename().string());
-    return true;
-}
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
@@ -115,7 +47,7 @@ int main(int argc, char* argv[]) {
         return 1;
     }
 
-    std::vector<ShaderJob> jobs;
+    std::vector<BatchJob> jobs;
     jobs.reserve(inputs.size());
 
     const bool is_multi_file = inputs.size() > 1;
@@ -140,12 +72,6 @@ int main(int argc, char* argv[]) {
         jobs.push_back({.input = input, .output = out_path});
     }
 
-    std::atomic has_error{false};
-
-    std::for_each(std::execution::par, jobs.begin(), jobs.end(), [&](const ShaderJob& job) {
-        if (!compile_single_shader(job.input, job.output, target_backend)) {
-            has_error = true;
-        }
-    });
-    return has_error ? 1 : 0;
+    const bool success = BSHCompiler::compile_batch(jobs, target_backend);
+    return success ? 0 : 1;
 }

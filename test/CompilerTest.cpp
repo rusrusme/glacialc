@@ -9,10 +9,10 @@
 #include <iostream>
 #include <vector>
 
-#include "BinaryPackager.hpp"
-#include "Compiler.hpp"
-#include "Preprocessor.hpp"
-#include "Utility.hpp"
+#include "../bshc/include/bshc/BinaryPackager.hpp"
+#include "../bshc/include/bshc/Compiler.hpp"
+#include "../bshc/include/bshc/Preprocessor.hpp"
+#include "bshc/Utility.hpp"
 
 using namespace bshc;
 

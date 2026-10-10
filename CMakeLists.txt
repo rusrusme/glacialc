@@ -24,7 +24,9 @@ add_library(bshc_core STATIC
             bshc/src/platform/opengl/GLCompiler.cpp
             bshc/src/platform/vulkan/VulkanCompiler.cpp
             bshc/src/platform/dx12/DX12Compiler.cpp
-            bshc/include/Log.hpp
+            bshc/include/bshc/Log.hpp
+            bshc/src/BSHCompiler.cpp
+            bshc/include/bshc/BSHCompiler.hpp
 )
 add_library(bshc::bshc_core ALIAS bshc_core)
 target_compile_features(bshc_core PUBLIC cxx_std_20)

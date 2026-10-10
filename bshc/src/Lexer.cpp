@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-#include "Lexer.hpp"
+#include "bshc/Lexer.hpp"
 
 #include <cctype>
 

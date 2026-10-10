@@ -11,7 +11,7 @@
 #include <unordered_set>
 #include <vector>
 
-#include "BSH.hpp"
+#include "bshc/BSH.hpp"
 
 namespace bshc {
     struct PreprocessedStage {

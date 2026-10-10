@@ -9,7 +9,7 @@
 #include <optional>
 #include <shaderc/shaderc.h>
 
-#include "BSH.hpp"
+#include "bshc/BSH.hpp"
 
 namespace bshc {
     template<typename T>

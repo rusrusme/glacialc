@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-#include "platform/dx12/DX12Compiler.hpp"
+#include "bshc/platform/dx12/DX12Compiler.hpp"
 
 #include <spirv_hlsl.hpp>
 #include <shaderc/shaderc.hpp>

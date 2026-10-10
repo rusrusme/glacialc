@@ -5,12 +5,11 @@
 
 #pragma once
 
-#include <cstdint>
 #include <string>
 #include <vector>
 
 #include "Preprocessor.hpp"
-#include "Utility.hpp"
+#include "bshc/Utility.hpp"
 
 namespace bshc {
     struct CompiledStage {

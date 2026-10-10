@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-#include "platform/vulkan/VulkanCompiler.hpp"
+#include "bshc/platform/vulkan/VulkanCompiler.hpp"
 
 #include <shaderc/shaderc.hpp>
 

@@ -1,3 +1,4 @@
+
 //
 // Copyright (c) 2026 rusrusme 
 // All rights reserved.
@@ -5,13 +6,13 @@
 
 #pragma once
 
-#include "Compiler.hpp"
+#include "bshc/Compiler.hpp"
 
 namespace bshc {
-    class DX12Compiler : public Compiler {
+    class VulkanCompiler : public Compiler {
     public:
-        DX12Compiler() = default;
-        ~DX12Compiler() override = default;
+        VulkanCompiler() = default;
+        ~VulkanCompiler() override = default;
 
         CompilerOutput compile(const ParsedData& data) override;
     };

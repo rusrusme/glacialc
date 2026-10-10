@@ -5,7 +5,7 @@
 
 #pragma once
 
-#include "Compiler.hpp"
+#include "bshc/Compiler.hpp"
 
 namespace bshc {
     class BinaryPackager {

@@ -3,7 +3,7 @@
 // All rights reserved.
 //
 
-#include "platform/opengl/GLCompiler.hpp"
+#include "bshc/platform/opengl/GLCompiler.hpp"
 
 #include <shaderc/shaderc.hpp>
 

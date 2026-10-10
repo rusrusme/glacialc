@@ -3,15 +3,14 @@
 // All rights reserved.
 //
 
-#include "Compiler.hpp"
+#include "bshc/Compiler.hpp"
 
 #include <memory>
 
-#include "Log.hpp"
-#include "Utility.hpp"
-#include "platform/dx12/DX12Compiler.hpp"
-#include "platform/opengl/GLCompiler.hpp"
-#include "platform/vulkan/VulkanCompiler.hpp"
+#include "bshc/Log.hpp"
+#include "bshc/platform/dx12/DX12Compiler.hpp"
+#include "bshc/platform/opengl/GLCompiler.hpp"
+#include "bshc/platform/vulkan/VulkanCompiler.hpp"
 
 namespace bshc {
     Unique<Compiler> Compiler::create(const RenderBackend& render_backend) {

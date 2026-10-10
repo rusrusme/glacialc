@@ -7,7 +7,7 @@
 #include <iostream>
 #include <string_view>
 
-#include "Lexer.hpp"
+#include "../bshc/include/bshc/Lexer.hpp"
 
 using namespace bshc;
 
