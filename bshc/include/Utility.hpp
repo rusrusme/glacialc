@@ -6,6 +6,7 @@
 #pragma once
 
 #include <memory>
+#include <optional>
 #include <shaderc/shaderc.h>
 
 #include "BSH.hpp"
