@@ -15,7 +15,7 @@ using namespace bshc;
 
 int main(int argc, char* argv[]) {
     if (argc < 2) {
-        BSH_MESSAGE("Usage: bshc <shader1.bsh> [shader2.bsh ...] [-o <dir> | <file>] [-b <opengl|vulkan|dx12>]");
+        BSH_MESSAGE("Usage: bshc <shader.bsh> [shader.bsh ...] [-o <dir> | <file>] [-b <opengl|vulkan|dx12>]");
         return 0;
     }
 

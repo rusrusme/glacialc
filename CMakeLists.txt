@@ -40,7 +40,7 @@ target_link_libraries(bshc_core PUBLIC Vulkan::Shaderc spirv-cross-hlsl)
 # ----------------------------------------------------------------------------
 if (BSHC_BUILD_EXECUTABLE)
     add_executable(BSHC
-                   bshc/src/BSH.cpp
+                   bshc/src/main.cpp
     )
     add_executable(bshc::bshc ALIAS BSHC)
     target_link_libraries(BSHC PRIVATE bshc_core)
