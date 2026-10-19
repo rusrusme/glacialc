@@ -25,10 +25,10 @@ using Microsoft::WRL::ComPtr;
 namespace bshc {
     static const wchar_t* get_dxc_target_profile(const ShaderStage stage) {
         switch (stage) {
-            case ShaderStage::Vertex   : return L"vs_6_0";
+            case ShaderStage::Vertex : return L"vs_6_0";
             case ShaderStage::Fragment : return L"ps_6_0";
             case ShaderStage::Geometry : return L"gs_6_0";
-            case ShaderStage::Compute  : return L"cs_6_0";
+            case ShaderStage::Compute : return L"cs_6_0";
         }
         return L"vs_6_0";
     }
@@ -46,6 +46,10 @@ namespace bshc {
         const shaderc::Compiler shaderc_compiler;
         shaderc::CompileOptions shaderc_options;
         shaderc_options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
+
+        shaderc_options.AddMacroDefinition("BSH_DX12", "1");
+        shaderc_options.AddMacroDefinition("BSH_BACKEND_DX12", "1");
+        shaderc_options.AddMacroDefinition("gl_BaseInstanceARB", "gl_BaseInstance");
 
         #if defined(_WIN32)
         ComPtr<IDxcUtils> dxc_utils;
@@ -144,7 +148,8 @@ namespace bshc {
                 output.error_message = "DX12 Stage 3 (HLSL->DXIL) Error:\n";
                 if (errors && errors->GetStringLength() > 0) {
                     output.error_message += errors->GetStringPointer();
-                } else {
+                }
+                else {
                     output.error_message += "Unknown DXC compilation failure.";
                 }
                 return output;
@@ -158,7 +163,7 @@ namespace bshc {
             }
 
             const auto* dxil_begin = static_cast<const uint8_t*>(dxil_blob->GetBufferPointer());
-            const auto* dxil_end   = dxil_begin + dxil_blob->GetBufferSize();
+            const auto* dxil_end = dxil_begin + dxil_blob->GetBufferSize();
             payload.assign(dxil_begin, dxil_end);
             #else
             payload.assign(hlsl_source.begin(), hlsl_source.end());

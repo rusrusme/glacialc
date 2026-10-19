@@ -24,6 +24,10 @@ namespace bshc {
         options.SetTargetEnvironment(shaderc_target_env_vulkan, shaderc_env_version_vulkan_1_2);
         options.SetOptimizationLevel(shaderc_optimization_level_performance);
 
+        options.AddMacroDefinition("BSH_VULKAN", "1");
+        options.AddMacroDefinition("BSH_BACKEND_VULKAN", "1");
+        options.AddMacroDefinition("gl_BaseInstanceARB", "gl_BaseInstance");
+
         output.stages.reserve(data.stages.size());
 
         for (const auto& [stage, source] : data.stages) {

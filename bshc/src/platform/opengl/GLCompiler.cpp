@@ -22,6 +22,9 @@ namespace bshc {
         shaderc::CompileOptions options;
         options.SetTargetEnvironment(shaderc_target_env_opengl, shaderc_env_version_opengl_4_5);
 
+        options.AddMacroDefinition("BSH_OPENGL", "1");
+        options.AddMacroDefinition("BSH_BACKEND_OPENGL", "1");
+
         output.stages.reserve(data.stages.size());
 
         for (const auto& [stage, source] : data.stages) {
@@ -46,12 +49,29 @@ namespace bshc {
 
     std::string GLCompiler::process_glsl_source(std::string_view raw_source, ShaderStage stage) {
         std::string glsl;
-        glsl.reserve(raw_source.size() + 64);
+        glsl.reserve(raw_source.size() + 128);
+
+        constexpr std::string_view ext_header = "#extension GL_ARB_shader_draw_parameters : enable\n";
 
         if (!raw_source.starts_with("#version")) {
-            glsl += "#version 450 core\n\n";
+            glsl += "#version 450 core\n";
+            glsl += ext_header;
+            glsl += '\n';
+            glsl += raw_source;
         }
-        glsl += raw_source;
+        else {
+            const size_t newline = raw_source.find('\n');
+            if (newline != std::string_view::npos) {
+                glsl.append(raw_source.substr(0, newline + 1));
+                glsl += ext_header;
+                glsl.append(raw_source.substr(newline + 1));
+            }
+            else {
+                glsl += raw_source;
+                glsl += '\n';
+                glsl += ext_header;
+            }
+        }
         return glsl;
     }
 } // bshc
