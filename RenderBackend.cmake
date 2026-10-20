@@ -34,7 +34,7 @@ FetchContent_Declare(
 FetchContent_MakeAvailable(spirv_cross)
 # ----------------------------------------------------------------------------
 if (WIN32)
-    target_compile_definitions(bshc_core PUBLIC RENDER_API_DX12)
-    target_link_libraries(bshc_core PUBLIC d3d12.lib dxgi.lib dxguid.lib dxcompiler.lib)
+    target_compile_definitions(glacialc_core PUBLIC RENDER_API_DX12)
+    target_link_libraries(glacialc_core PUBLIC d3d12.lib dxgi.lib dxguid.lib dxcompiler.lib)
 endif ()
 # ----------------------------------------------------------------------------

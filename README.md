@@ -1,6 +1,6 @@
-# BSHC — Basis Shader Compiler
+# glacialc — Glacial Shader Compiler
 
-**BSHC** is a lightweight, high-performance, platform-agnostic shader compilation pipeline written in C++20. It allows game developers to write unified multi-stage shaders (`bsh`) and compile them into a compact, contiguous binary format (`bshb`) targeting **OpenGL**, **Vulkan**, and **DirectX 12**
+**glacialc** is a lightweight, high-performance, platform-agnostic shader compilation pipeline written in C++20. It allows game developers to write unified multi-stage shaders (`gshader`) and compile them into a compact, contiguous binary format (`gsb`) targeting **OpenGL**, **Vulkan**, and **DirectX 12**
 
 ---
 
@@ -21,9 +21,9 @@
 
 ---
 
-## BSH Shader Language Syntax (`.bsh`)
+## Glacial Shader Language Syntax (`.gshader`)
 
-BSH shaders use standard GLSL syntax with a flat resource binding model. Code written outside stage directives is automatically treated as **global scope** and prepended to all stages
+GSH shaders use standard GLSL syntax with a flat resource binding model. Code written outside stage directives is automatically treated as **global scope** and prepended to all stages
 
 ```glsl
 // =========================================================
@@ -63,7 +63,7 @@ void main() {
 
 ---
 
-## Building BSHC
+## Building glacialc
 ### Requirements
 - C++20 Compiler (MSVC 19.30+, Clang 13+, GCC 11+)
 - CMake 3.20+
@@ -73,44 +73,44 @@ void main() {
 ---
 CMake Build Instructions
 ```bash
-git clone https://github.com/rusrusme/BasisShaderCompiler.git
-cd BasisShaderCompiler
+git clone https://github.com/rusrusme/glacialc.git
+cd GlacialShaderCompiler
 mkdir build && cd build
 cmake .. -DCMAKE_BUILD_TYPE=Release
 cmake --build . --config Release
 ```
 
-## Adding BSHC to a Project
+## Adding glacialc to a Project
 ```cmake
 include(FetchContent)
 FetchContent_Declare(
-        BasisShaderCompiler
-        GIT_REPOSITORY https://github.com/rusrusme/BasisShaderCompiler.git
+        glacialc
+        GIT_REPOSITORY https://github.com/rusrusme/glacialc.git
         GIT_TAG v1.0.2
 )
-FetchContent_MakeAvailable(BasisShaderCompiler)
+FetchContent_MakeAvailable(glacialc)
 # ...
-target_link_libraries(<PROJECT> PRIVATE bshc::bshc_core)
+target_link_libraries(<PROJECT> PRIVATE glacialc::glacialc_core)
 ```
 
 ---
 CLI Command Line Usage
 ```bash
 # General Usage
-bshc <input.bsh> [-o <output.bshb>] [-b <backend>]
+bshc <input.gshader> [-o <output.gsb>] [-b <backend>]
 
 # Compile for OpenGL
-bshc shaders/basic.bsh -o bin/basic_gl.bshb -b opengl
+bshc shaders/basic.gshader -o bin/basic_gl.gsb -b opengl
 
 # Compile for Vulkan
-bshc shaders/basic.bsh -o bin/basic_vk.bshb -b vulkan
+bshc shaders/basic.gshader -o bin/basic_vk.gsb -b vulkan
 
 # Compile for DirectX 12
-bshc shaders/basic.bsh -o bin/basic_dx12.bshb -b dx12
+bshc shaders/basic.gshader -o bin/basic_dx12.gsb -b dx12
 ```
 ---
 CLI Arguments
-- <input.bsh> : Path to input BSH shader source file
+- <input.gshader> : Path to input GSH shader source file
 
 - -o, --output : (Optional) Path to output binary file
 
