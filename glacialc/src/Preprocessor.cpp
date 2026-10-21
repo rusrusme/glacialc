@@ -106,6 +106,11 @@ namespace glacialc {
                 continue;
             }
 
+            if (trimmed == "#common") {
+                active_stage_idx = -1;
+                continue;
+            }
+
             if (trimmed == "#vert" || trimmed == "#frag" || trimmed == "#geom" || trimmed == "#comp") {
                 auto stage = ShaderStage::Vertex;
                 if (trimmed == "#frag") stage = ShaderStage::Fragment;

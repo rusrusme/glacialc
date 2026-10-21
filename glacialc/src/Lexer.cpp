@@ -153,6 +153,7 @@ namespace glacialc {
         if (kw == "frag") return make_token(TokenType::FRAG, current_ - start_);
         if (kw == "geom") return make_token(TokenType::GEOM, current_ - start_);
         if (kw == "comp") return make_token(TokenType::COMP, current_ - start_);
+        if (kw == "common") return make_token(TokenType::COMMON, current_ - start_);
 
         // Preprocessor Directives
         if (kw == "include") return make_token(TokenType::INCLUDE, current_ - start_);

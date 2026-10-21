@@ -15,6 +15,7 @@ namespace glacialc {
         FRAG,
         GEOM,
         COMP,
+        COMMON,
 
         INCLUDE,
         DEFINE,

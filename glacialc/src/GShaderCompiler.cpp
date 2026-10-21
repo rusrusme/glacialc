@@ -66,6 +66,20 @@ namespace glacialc {
 
         parsed.header.backend = target_backend;
 
+        if (parsed.stages.empty()) {
+            GSH_MESSAGE("Skipping stage compilation for header file: {} (0 stages)", input_path.filename().string());
+
+            if (output_path.has_parent_path()) {
+                std::filesystem::create_directories(output_path.parent_path());
+            }
+            if (const auto bin =
+                BinaryPackager::package_binary(parsed.header, {}); !BinaryPackager::save(output_path, bin)) {
+                GSH_ERROR("Failed to write header binary file: {}", output_path.string());
+                return false;
+            }
+            return true;
+        }
+
         Unique<Compiler> compiler = Compiler::create(target_backend);
         if (!compiler) {
             GSH_ERROR("Unsupported or uncompiled render backend: {}", to_string(target_backend));
